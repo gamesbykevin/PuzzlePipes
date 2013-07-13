@@ -34,11 +34,6 @@ public class ResourceManager
         TitleScreen, Credits, AppletFocus, TitleBackground, Mouse, MouseDrag, Instructions1, Instructions2, Controls
     }
     
-    public enum GameImage
-    {
-        Hex1, Hex2, Hex3
-    }
-    
     public enum GameFont
     {
         Dialog
@@ -60,9 +55,6 @@ public class ResourceManager
     {
         //load all menu images
         add(Type.MenuImage, (Object[])MenuImage.values(), RESOURCE_DIR + "images/menu/{0}.gif", "Loading Menu Image Resources", Resources.Type.Image);
-        
-        //load all game images
-        add(Type.GameImage, (Object[])GameImage.values(), RESOURCE_DIR + "images/game/{0}.gif", "Loading Game Image Resources", Resources.Type.Image);
         
         //load all game fonts
         add(Type.GameFont, (Object[])GameFont.values(), RESOURCE_DIR + "font/{0}.ttf", "Loading Game Font Resources", Resources.Type.Font);
