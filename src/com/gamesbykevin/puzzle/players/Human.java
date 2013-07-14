@@ -40,7 +40,7 @@ public class Human extends Board implements Player
             //check each piece for mouse input
             for (Piece p : getPieces())
             {
-                final boolean hasBounds = p.getShape().contains(engine.getMouse().getMouseLocation());
+                final boolean hasBounds = p.getShape().contains(engine.getMouse().getLocation());
                 
                 if (engine.getMouse().isMousePressed() && hasBounds && !p.hasRotate())
                 {
