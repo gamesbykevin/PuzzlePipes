@@ -17,5 +17,7 @@ public class Shared
     
     public static final int DEFAULT_UPS = 60;
     
+    public static final String GAME_NAME = "Puzzle Pipes";
+    
     public static final Cursor CURSOR = Toolkit.getDefaultToolkit().createCustomCursor(new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB), new Point(0, 0), "blank cursor");
 }

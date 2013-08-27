@@ -4,15 +4,11 @@ import com.gamesbykevin.framework.util.TimerCollection;
 import com.gamesbykevin.framework.input.*;
 import com.gamesbykevin.framework.input.Keyboard;
 
-import com.gamesbykevin.puzzle.menu.GameMenu;
+import com.gamesbykevin.puzzle.menu.CustomMenu;
 import com.gamesbykevin.puzzle.players.*;
 
 import java.awt.*;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
-import java.awt.event.MouseMotionListener;
+import java.awt.event.*;
 
 public class Engine implements KeyListener, MouseMotionListener, MouseListener, EngineRules 
 {
@@ -26,10 +22,10 @@ public class Engine implements KeyListener, MouseMotionListener, MouseListener, 
     private Agent agent;
     
     //access this menu here
-    private GameMenu menu;
+    private CustomMenu menu;
     
     //object that contains all image/audio resources in the game
-    private ResourceManager resources;
+    private Resources resources;
     
     //mouse object that will be recording mouse input
     private Mouse mouse;
@@ -54,16 +50,17 @@ public class Engine implements KeyListener, MouseMotionListener, MouseListener, 
      * @param main Main object that contains important information so we need a reference to it
      * @throws CustomException 
      */
-    public Engine(final Main main) 
+    public Engine(final Main main) throws Exception
     {
         this.main = main;
         this.mouse = new Mouse();
         this.keyboard = new Keyboard();
-        this.resources = new ResourceManager();
+        this.resources = new Resources();
         this.timer = new TimerCollection(main.getTimeDeductionPerFrame());
         this.timer.add(TimerKeys.NextGame, TimerCollection.toNanoSeconds(3000L));
     }
     
+    @Override
     public void dispose()
     {
         try
@@ -93,20 +90,20 @@ public class Engine implements KeyListener, MouseMotionListener, MouseListener, 
 
                 //resources are now loaded so create the menu
                 if (!resources.isLoading())
-                    menu = new GameMenu(resources, main.getScreen());
+                    menu = new CustomMenu(this);
             }
             else
             {
                 if (!menu.hasFocus())
                 {
-                    mouse.resetMouseEvents();
-                    keyboard.resetAllKeyEvents();
+                    mouse.reset();;
+                    keyboard.reset();
                 }
 
-                menu.update(main, this, resources, keyboard, mouse);
+                menu.update(this);
 
                 //if the menu is on the last layer and the window has focus
-                if (menu.isMenuFinished() && menu.hasFocus())
+                if (menu.hasFinished() && menu.hasFocus())
                 {
                     //MAIN GAME LOGIC RUN HERE
                     if (agent != null)
@@ -166,7 +163,7 @@ public class Engine implements KeyListener, MouseMotionListener, MouseListener, 
                 }
 
                 //reset all mouse events
-                mouse.resetMouseEvents();
+                mouse.reset();
             }
         }
         catch(Exception e)
@@ -175,13 +172,14 @@ public class Engine implements KeyListener, MouseMotionListener, MouseListener, 
         }
     }
     
+    @Override
     public void reset() throws Exception
     {
-        int shape      = menu.getOptionSelectionIndex(GameMenu.LayerKey.Options, GameMenu.OptionKey.Shape);
-        int algorithm  = menu.getOptionSelectionIndex(GameMenu.LayerKey.Options, GameMenu.OptionKey.Algorithm);
-        int blocks     = menu.getOptionSelectionIndex(GameMenu.LayerKey.Options, GameMenu.OptionKey.Blocks);
-        int indexVs    = menu.getOptionSelectionIndex(GameMenu.LayerKey.Options, GameMenu.OptionKey.VsMode);
-        int difficulty = menu.getOptionSelectionIndex(GameMenu.LayerKey.Options, GameMenu.OptionKey.Difficulty);
+        int shape      = menu.getOptionSelectionIndex(CustomMenu.LayerKey.Options, CustomMenu.OptionKey.Shape);
+        int algorithm  = menu.getOptionSelectionIndex(CustomMenu.LayerKey.Options, CustomMenu.OptionKey.Algorithm);
+        int blocks     = menu.getOptionSelectionIndex(CustomMenu.LayerKey.Options, CustomMenu.OptionKey.Blocks);
+        int indexVs    = menu.getOptionSelectionIndex(CustomMenu.LayerKey.Options, CustomMenu.OptionKey.VsMode);
+        int difficulty = menu.getOptionSelectionIndex(CustomMenu.LayerKey.Options, CustomMenu.OptionKey.Difficulty);
         
         //if 1 player make sure agent is null
         if (indexVs == 0)
@@ -194,7 +192,7 @@ public class Engine implements KeyListener, MouseMotionListener, MouseListener, 
                 if (human.hasConnectedAll() && !agent.hasConnectedAll())
                 {
                     blocks++;
-                    menu.setOptionSelectionIndex(GameMenu.LayerKey.Options, GameMenu.OptionKey.Blocks, blocks);
+                    menu.setOptionSelectionIndex(CustomMenu.LayerKey.Options, CustomMenu.OptionKey.Blocks, blocks);
                 }
             }
             else
@@ -202,12 +200,12 @@ public class Engine implements KeyListener, MouseMotionListener, MouseListener, 
                 if (human.hasConnectedAll())
                 {
                     blocks++;
-                    menu.setOptionSelectionIndex(GameMenu.LayerKey.Options, GameMenu.OptionKey.Blocks, blocks);
+                    menu.setOptionSelectionIndex(CustomMenu.LayerKey.Options, CustomMenu.OptionKey.Blocks, blocks);
                 }
             }
         }
         
-        timer.resetRemaining(TimerKeys.NextGame);
+        timer.reset(TimerKeys.NextGame);
         
         human = new Human();
         human.setTimers(main.getTimeDeductionPerFrame());
@@ -241,7 +239,7 @@ public class Engine implements KeyListener, MouseMotionListener, MouseListener, 
         }
         
         getResources().stopAllSound();
-        getResources().playMusic(ResourceManager.GameAudioMusic.Theme, true);
+        getResources().playMusic(Resources.GameAudioMusic.Theme, true);
     }
     
     public Graphics render(Graphics g) throws Exception
@@ -276,7 +274,7 @@ public class Engine implements KeyListener, MouseMotionListener, MouseListener, 
         Font f = g2d.getFont();
         Stroke stroke = g2d.getStroke();
         
-        g2d.setFont(resources.getGameFont(ResourceManager.GameFont.Dialog));
+        g2d.setFont(resources.getGameFont(Resources.GameFont.Dialog));
         //g2d.setStroke(new BasicStroke(4));
         
         if (human != null)
@@ -304,76 +302,86 @@ public class Engine implements KeyListener, MouseMotionListener, MouseListener, 
     private Graphics renderMenu(Graphics g) throws Exception
     {
         //if menu is setup draw menu
-        if (menu.isMenuSetup())
+        if (menu.isSetup())
             menu.render(g);
 
         //is menu is finished and we dont want to hide mouse cursor then draw it, or if the menu is not finished show mouse
-        if (menu.isMenuFinished() && !Main.hideMouse || !menu.isMenuFinished())
+        if (menu.hasFinished() && !Main.hideMouse || !menu.hasFinished())
         {
             Point p = mouse.getLocation();
 
-            if (p != null && resources.getMenuImage(ResourceManager.MenuImage.Mouse) != null && resources.getMenuImage(ResourceManager.MenuImage.MouseDrag) != null)
+            if (p != null && resources.getMenuImage(Resources.MenuImage.Mouse) != null && resources.getMenuImage(Resources.MenuImage.MouseDrag) != null)
             {
                 if (mouse.isMouseDragged())
-                    g.drawImage(resources.getMenuImage(ResourceManager.MenuImage.MouseDrag), p.x, p.y, null);
+                    g.drawImage(resources.getMenuImage(Resources.MenuImage.MouseDrag), p.x, p.y, null);
                 else
-                    g.drawImage(resources.getMenuImage(ResourceManager.MenuImage.Mouse), p.x, p.y, null);
+                    g.drawImage(resources.getMenuImage(Resources.MenuImage.Mouse), p.x, p.y, null);
             }
         }
 
         return g;
     }
     
-    public ResourceManager getResources()
+    public Resources getResources()
     {
         return resources;
     }
     
+    @Override
     public void keyReleased(KeyEvent e)
     {
-        keyboard.setKeyReleased(e.getKeyCode());
+        keyboard.addKeyReleased(e.getKeyCode());
     }
     
+    @Override
     public void keyPressed(KeyEvent e)
     {
-        keyboard.setKeyPressed(e.getKeyCode());
+        keyboard.addKeyPressed(e.getKeyCode());
     }
     
+    @Override
     public void keyTyped(KeyEvent e)
     {
-        keyboard.setKeyTyped(e.getKeyChar());
+        keyboard.addKeyTyped(e.getKeyChar());
     }
     
+    @Override
     public void mouseClicked(MouseEvent e)
     {
         mouse.setMouseClicked(e);
     }
     
+    @Override
     public void mousePressed(MouseEvent e)
     {
         mouse.setMousePressed(e);
     }
     
+    @Override
     public void mouseReleased(MouseEvent e)
     {
         mouse.setMouseReleased(e);
     }
     
+    @Override
     public void mouseEntered(MouseEvent e)
     {
         mouse.setMouseEntered(e.getPoint());
     }
     
+    @Override
     public void mouseExited(MouseEvent e)
     {
         mouse.setMouseExited(e.getPoint());
     }
     
+    @Override
     public void mouseMoved(MouseEvent e)
     {
         mouse.setMouseMoved(e.getPoint());
     }
     
+    @Override
     public void mouseDragged(MouseEvent e)
     {
         mouse.setMouseDragged(e.getPoint());
@@ -387,5 +395,10 @@ public class Engine implements KeyListener, MouseMotionListener, MouseListener, 
     public Keyboard getKeyboard()
     {
         return keyboard;
+    }
+    
+    public Main getMain()
+    {
+        return this.main;
     }
 }

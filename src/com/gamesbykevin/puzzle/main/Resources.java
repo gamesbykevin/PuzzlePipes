@@ -1,8 +1,7 @@
 package com.gamesbykevin.puzzle.main;
 
-import com.gamesbykevin.framework.resources.Progress;
-import com.gamesbykevin.framework.resources.Resources;
-import com.gamesbykevin.framework.resources.AudioResource;
+import com.gamesbykevin.framework.resources.Manager;
+import com.gamesbykevin.framework.resources.Audio;
 
 import java.awt.Font;
 import java.awt.Graphics;
@@ -13,16 +12,24 @@ import java.util.LinkedHashMap;
 import javax.swing.JApplet;
 import javax.swing.JPanel;
 
-public class ResourceManager 
-{   //this class will contain all resources and methods to load/access all resources
-    private LinkedHashMap everyResource = new LinkedHashMap();
+/**
+ * this class will contain all resources and methods to load/access all resources
+ * @author GOD
+ */
+public class Resources 
+{
+    private LinkedHashMap<Object, Manager> everyResource = new LinkedHashMap<>();
     
+    /**
+     * Type of resource
+     */
     private enum Type
-    {   //resource type
+    {
         MenuImage, MenuAudio, GameImage, GameFont, GameAudioEffects, GameAudioMusic
     }
     
-    public static final String RESOURCE_DIR = "resources/"; //root directory of all resources
+    //root directory of all resources
+    public static final String RESOURCE_DIR = "resources/"; 
     
     public enum MenuAudio
     {
@@ -51,34 +58,42 @@ public class ResourceManager
     
     private boolean loading = true;
     
-    public ResourceManager() 
+    public Resources() throws Exception
     {
         //load all menu images
-        add(Type.MenuImage, (Object[])MenuImage.values(), RESOURCE_DIR + "images/menu/{0}.gif", "Loading Menu Image Resources", Resources.Type.Image);
+        add(Type.MenuImage, (Object[])MenuImage.values(), RESOURCE_DIR + "images/menu/{0}.gif", "Loading Menu Image Resources", Manager.Type.Image);
         
         //load all game fonts
-        add(Type.GameFont, (Object[])GameFont.values(), RESOURCE_DIR + "font/{0}.ttf", "Loading Game Font Resources", Resources.Type.Font);
+        add(Type.GameFont, (Object[])GameFont.values(), RESOURCE_DIR + "font/{0}.ttf", "Loading Game Font Resources", Manager.Type.Font);
         
         //load all menu audio
-        add(Type.MenuAudio, (Object[])MenuAudio.values(), RESOURCE_DIR + "audio/menu/{0}.wav", "Loading Menu Audio Resources", Resources.Type.Audio);
+        add(Type.MenuAudio, (Object[])MenuAudio.values(), RESOURCE_DIR + "audio/menu/{0}.wav", "Loading Menu Audio Resources", Manager.Type.Audio);
         
         //load all game audio
-        add(Type.GameAudioEffects, (Object[])GameAudioEffects.values(), RESOURCE_DIR + "audio/game_effects/{0}.wav", "Loading Game Audio Resources", Resources.Type.Audio);
+        add(Type.GameAudioEffects, (Object[])GameAudioEffects.values(), RESOURCE_DIR + "audio/game_effects/{0}.wav", "Loading Game Audio Resources", Manager.Type.Audio);
 
         //load all game audio
-        add(Type.GameAudioMusic,  (Object[])GameAudioMusic.values(),   RESOURCE_DIR + "audio/game_music/{0}.mp3", "Loading Game Audio Resources", Resources.Type.Audio);
+        add(Type.GameAudioMusic,  (Object[])GameAudioMusic.values(),   RESOURCE_DIR + "audio/game_music/{0}.mp3", "Loading Game Audio Resources", Manager.Type.Audio);
     }
     
-    private void add(Object key, Object[] eachResourceKey, String directory, String loadDesc, Resources.Type resourceType)  
-    {   //add a collection of resources audio/image/font
+    /**
+     * add a collection of resources audio/image/font
+     * @param key
+     * @param eachResourceKey
+     * @param directory
+     * @param loadDesc
+     * @param resourceType 
+     */
+    private void add(Object key, Object[] eachResourceKey, String directory, String loadDesc, Manager.Type resourceType) throws Exception
+    {
         String[] locations = new String[eachResourceKey.length];
         for (int i=0; i < locations.length; i++)
         {
             locations[i] = MessageFormat.format(directory, i);
         }
 
-        Resources resources = new Resources(Resources.LoadMethod.OnePerFrame, locations, eachResourceKey, resourceType);
-        resources.setDesc(loadDesc);
+        Manager resources = new Manager(Manager.LoadMethod.OnePerFrame, locations, eachResourceKey, resourceType);
+        resources.setDescription(loadDesc);
         
         everyResource.put(key, resources);
     }
@@ -88,9 +103,9 @@ public class ResourceManager
         return loading;
     }
     
-    private Resources getResources(Object key)
+    private Manager getResources(Object key)
     {
-        return (Resources)everyResource.get(key);
+        return everyResource.get(key);
     }
     
     public Font getGameFont(Object key)
@@ -108,7 +123,7 @@ public class ResourceManager
         return getResources(Type.MenuImage).getImage(key);
     }
     
-    public AudioResource getMenuAudio(Object key)
+    public Audio getMenuAudio(Object key)
     {
         return getResources(Type.MenuAudio).getAudio(key);
     }
@@ -125,7 +140,7 @@ public class ResourceManager
     
     public void stopSound(Object key)
     {
-        getResources(Type.GameAudioEffects).getAudio(key).stop();
+        getResources(Type.GameAudioEffects).getAudio(key).stopSound();
     }
     
     public void stopAllSound()
@@ -150,11 +165,11 @@ public class ResourceManager
         
         for (Object key : keys)
         {
-            Resources r = getResources(key);
+            Manager resources = getResources(key);
             
-            if (!r.isLoadingComplete())
+            if (!resources.isComplete())
             {
-                r.loadResources(source);
+                resources.update(source);
                 return;
             }
         }
@@ -170,8 +185,8 @@ public class ResourceManager
     
     public void setAudioEnabled(boolean soundEnabled)
     {
-        Resources r1 = getResources(Type.GameAudioEffects);
-        Resources r2 = getResources(Type.GameAudioMusic);
+        Manager r1 = getResources(Type.GameAudioEffects);
+        Manager r2 = getResources(Type.GameAudioMusic);
         
         if ((r1.isAudioEnabled() && soundEnabled) || (!r1.isAudioEnabled() && !soundEnabled))
             return;
@@ -192,14 +207,14 @@ public class ResourceManager
         
         for (Object key : keys)
         {
-            Resources r = getResources(key);
+            Manager manager = getResources(key);
             
-            if (r != null)
-                r.dispose();
+            if (manager != null)
+                manager.dispose();
             
-            r = null;
+            manager = null;
             
-            everyResource.put(key, r);
+            everyResource.put(key, manager);
         }
         
         keys = null;
@@ -208,24 +223,24 @@ public class ResourceManager
         everyResource = null;
     }
     
-    public Graphics draw(Graphics g, final Rectangle screen)
+    public Graphics draw(Graphics graphics, final Rectangle screen)
     {
         if (!loading)
-            return g;
+            return graphics;
         
         Object[] keys = everyResource.keySet().toArray();
         
         for (Object key : keys)
         {
-            Resources r = getResources(key);
+            Manager manager = getResources(key);
             
-            if (!r.isLoadingComplete())
+            if (!manager.isComplete())
             {
-                Progress.draw(g, screen, r.getProgress(), r.getDesc());
-                return g;
+                manager.render(graphics, screen);
+                return graphics;
             }
         }
         
-        return g;
+        return graphics;
     }
 }

@@ -27,16 +27,19 @@ public class Agent extends Board implements Player
         this.cpuDelay = CPU_DELAY_DIFFICULTY[difficulty];
     }
     
+    @Override
     public void setShape(final int shape)
     {
         super.setShape(shape);
     }
     
+    @Override
     public void setAlgorithm(final int algorithm)
     {
         super.setAlgorithm(algorithm);
     }
             
+    @Override
     public void setTimers(final long timeDeduction)
     {
         super.setTimers(timeDeduction);
@@ -44,11 +47,13 @@ public class Agent extends Board implements Player
         getTimers().add(TimerKey.CPU_DELAY, TimerCollection.toNanoSeconds(cpuDelay));
     }
     
+    @Override
     public void generate(final int layers, final Rectangle boundary)
     {
         super.generate(layers, boundary);
     }
     
+    @Override
     public void update(Engine engine)
     {
         if (hasConnectedAll())
@@ -64,7 +69,7 @@ public class Agent extends Board implements Player
         //if we aren't spinning and past the intro and we have awaited the delay for cpu
         if (!hasSpin() && !hasIntro() && getTimers().hasTimePassed(TimerKey.CPU_DELAY))
         {
-            getTimers().resetRemaining(TimerKey.CPU_DELAY);
+            getTimers().reset(TimerKey.CPU_DELAY);
             
             //has the current piece finished rotating
             if (hasRotationFinished())

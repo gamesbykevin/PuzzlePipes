@@ -1,9 +1,6 @@
 package com.gamesbykevin.puzzle.main;
 
-
-
 import java.awt.Graphics;
-import java.awt.Rectangle;
 
 public interface EngineRules 
 {

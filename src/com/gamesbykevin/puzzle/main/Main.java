@@ -220,15 +220,18 @@ public class Main extends Thread
      */
     private void renderImage() throws Exception
     {
-        Graphics g = getBufferedImage().getGraphics();
-        
-        g.setColor(Color.BLACK);
-        g.fillRect(originalSizeWindow.x, originalSizeWindow.y, originalSizeWindow.width, originalSizeWindow.height);
-        
-        engine.render(g);
-        
-        if (showCounter)
-            renderCounter(g);
+        if (getBufferedImage() != null)
+        {
+            Graphics g = getBufferedImage().getGraphics();
+
+            g.setColor(Color.BLACK);
+            g.fillRect(originalSizeWindow.x, originalSizeWindow.y, originalSizeWindow.width, originalSizeWindow.height);
+
+            engine.render(g);
+
+            if (showCounter)
+                renderCounter(g);
+        }
     }
     
     public boolean hasFocus()
@@ -269,6 +272,9 @@ public class Main extends Thread
     
     private void drawScreen()
     {
+        if (bufferedImage == null)
+            return;
+        
         Graphics g;
         
         //create the rectangle on the fly for full screen

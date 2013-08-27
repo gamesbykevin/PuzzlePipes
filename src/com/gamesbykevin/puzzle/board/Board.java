@@ -3,7 +3,7 @@ package com.gamesbykevin.puzzle.board;
 import com.gamesbykevin.framework.base.Cell;
 import com.gamesbykevin.framework.util.TimerCollection;
 import com.gamesbykevin.puzzle.main.Engine;
-import com.gamesbykevin.puzzle.main.ResourceManager;
+import com.gamesbykevin.puzzle.main.Resources;
 import com.gamesbykevin.puzzle.shapes.*;
 
 import java.awt.*;
@@ -413,11 +413,11 @@ public class Board
                 //if old count is less than new count another piece has been connected, play sound effect
                 if (oldCount < newCount)
                 {
-                    engine.getResources().playSound(ResourceManager.GameAudioEffects.Connection, false);
+                    engine.getResources().playSound(Resources.GameAudioEffects.Connection, false);
                 }
                 else
                 {
-                    engine.getResources().playSound(ResourceManager.GameAudioEffects.NoConnection, false);
+                    engine.getResources().playSound(Resources.GameAudioEffects.NoConnection, false);
                 }
             }
         }
@@ -554,7 +554,7 @@ public class Board
             {
                 intro = false;
                 spin = true;
-                engine.getResources().playSound(ResourceManager.GameAudioEffects.Spinning, false);
+                engine.getResources().playSound(Resources.GameAudioEffects.Spinning, false);
             }
         } 
         else 
@@ -600,7 +600,7 @@ public class Board
      * @param resources ResourceCollection that contains sound/images etc....
      * @return Graphics2d object to write game objects
      */
-    public Graphics2D render(Graphics2D g2d, final ResourceManager resources)
+    public Graphics2D render(Graphics2D g2d, final Resources resources)
     {
         for (Piece p : pieces)
         {
