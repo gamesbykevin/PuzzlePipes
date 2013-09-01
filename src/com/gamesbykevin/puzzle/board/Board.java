@@ -152,7 +152,7 @@ public class Board
                         square.setX(startX + (col * square.getWidth())  + (square.getWidth() /2));
                         square.setY(startY + (row * square.getHeight()) + (square.getHeight()/2));
                         
-                        square.setPolygon(square.getPolygon(square.getX(), square.getY(), (square.getWidth() /2)));
+                        square.setPolygon(square.getPolygon((int)square.getX(), (int)square.getY(), (int)(square.getWidth() /2)));
                         
                         //add all the neighbors to this piece regardless if connected or not
                         //NOTE add neighbors in clockwise fashion around current piece
@@ -192,7 +192,7 @@ public class Board
                         
                         hexagon.setY( startY + (row * (hexagon.getHeight() * .75) ) );
                         
-                        hexagon.setPolygon( hexagon.getPolygon(hexagon.getX(), hexagon.getY(), (hexagon.getWidth() /2)) );
+                        hexagon.setPolygon( hexagon.getPolygon((int)hexagon.getX(), (int)hexagon.getY(), (int)(hexagon.getWidth() /2)) );
                         
                         //add all the neighbors to this piece regardless if connected or not
                         //NOTE add neighbors in clockwise fashion around current piece

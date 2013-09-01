@@ -192,7 +192,7 @@ public class Engine implements KeyListener, MouseMotionListener, MouseListener, 
                 if (human.hasConnectedAll() && !agent.hasConnectedAll())
                 {
                     blocks++;
-                    menu.setOptionSelectionIndex(CustomMenu.LayerKey.Options, CustomMenu.OptionKey.Blocks, blocks);
+                    menu.setOptionSelectionIndex(CustomMenu.OptionKey.Blocks, blocks);
                 }
             }
             else
@@ -200,7 +200,7 @@ public class Engine implements KeyListener, MouseMotionListener, MouseListener, 
                 if (human.hasConnectedAll())
                 {
                     blocks++;
-                    menu.setOptionSelectionIndex(CustomMenu.LayerKey.Options, CustomMenu.OptionKey.Blocks, blocks);
+                    menu.setOptionSelectionIndex(CustomMenu.OptionKey.Blocks, blocks);
                 }
             }
         }

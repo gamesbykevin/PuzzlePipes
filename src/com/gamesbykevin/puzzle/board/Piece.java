@@ -77,7 +77,7 @@ public class Piece extends Sprite
     {
         for (int i : connectedNeighbors)
         {
-            connectors.add(getX(), getY(), getWidth() / 2, eachRotation * i);
+            connectors.add((int)getX(), (int)getY(), (int)(getWidth() / 2), eachRotation * i);
         }
     }
     
